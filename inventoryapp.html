@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Inventory Management System | Zuqo Corporation</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #6a5acd;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        footer {
+            background-color: #6a5acd;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+
+        /* Login Form Styles */
+        .login-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 10px;
+            background: #6a5acd;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .login-container button:hover {
+            background: #564dbb;
+        }
+
+        /* Dashboard Styles */
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-top: 40px;
+        }
+
+        .option-card {
+            background: white;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .option-card:hover {
+            background-color: #f0f0f0;
+        }
+
+        .option-card h3 {
+            margin: 0;
+        }
+
+        /* Error Message */
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        /* Inventory View Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #6a5acd;
+            color: white;
+        }
+
+        .button {
+            background-color: #6a5acd;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background-color: #564dbb;
+        }
+
+        .back-button {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <h1>Inventory Management System</h1>
+        <p>Empowering Zuqo Corporation's Stock Management with Efficiency and Precision</p>
+    </header>
+
+    <!-- Login Form Section -->
+    <section id="login" class="container">
+        <div class="login-container">
+            <h2>Login</h2>
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button onclick="window.location='http://127.0.0.1:5000'">Login</button>
+            <p class="error-message" id="error-message"></p>
+        </div>
+    </section>
+
+    <!-- Dashboard Section (Hidden initially) -->
+    <section id="dashboard" class="container" style="display:none;">
+        <div class="dashboard-container">
+            <div class="option-card" onclick="viewInventory()">
+                <h3>View Inventory</h3>
+                <p>See the current stock of hardware components</p>
+            </div>
+
+            <div class="option-card" onclick="addItem()">
+                <h3>Add New Item</h3>
+                <p>Add a new hardware item to the inventory</p>
+            </div>
+
+            <div class="option-card" onclick="viewRestocking()">
+                <h3>View Restocking Needs</h3>
+                <p>Check if any items are running low and need restocking</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Inventory Section (Hidden initially) -->
+    <section id="inventory-section" style="display:none;">
+        <div id="inventory-container"></div>
+        <button class="button back-button" onclick="backToDashboard()">Back to Dashboard</button>
+    </section>
+
+    <!-- Add New Item Section (Hidden initially) -->
+    <section id="add-new-item-section" style="display:none;">
+        <h2>Add New Item Form</h2>
+        <form>
+            <!-- Form fields for adding new item here -->
+            <input type="text" id="new-item-name" placeholder="Item Name" required>
+            <input type="number" id="new-item-quantity" placeholder="Quantity" required>
+            <input type="text" id="new-item-location" placeholder="Location" required>
+            <input type="date" id="new-item-date" placeholder="Date" required>
+            <button type="submit" class="button">Add Item</button>
+        </form>
+        <button class="button back-button" onclick="backToDashboard()">Back to Dashboard</button>
+    </section>
+
+    <!-- View Restocking Needs Section (Hidden initially) -->
+    <section id="restocking-section" style="display:none;">
+        <h2>View Restocking Needs</h2>
+        <!-- Implement restocking needs logic here -->
+        <button class="button back-button" onclick="backToDashboard()">Back to Dashboard</button>
+    </section>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>&copy; 2025 Zuqo Corporation</p>
+    </footer>
+
+    <script>
+        // Inventory data
+        const inventoryData = {
+            "Office Supplies": [
+                { item: "Pens", quantity: 200, unitCost: 0.50, vendor: "Office Depot", lastRestocked: "2025-01-01", minQuantity: 50 },
+                { item: "Notebooks", quantity: 100, unitCost: 2.00, vendor: "Staples", lastRestocked: "2025-01-10", minQuantity: 20 },
+                { item: "Printer Paper", quantity: 50, unitCost: 5.00, vendor: "Amazon", lastRestocked: "2024-12-15", minQuantity: 10 },
+                { item: "Staplers", quantity: 25, unitCost: 10.00, vendor: "OfficeMax", lastRestocked: "2024-12-20", minQuantity: 5 },
+                { item: "Tape Dispensers", quantity: 10, unitCost: 3.00, vendor: "Staples", lastRestocked: "2024-12-25", minQuantity: 2 }
+            ],
+            "IT Equipment": [
+                { item: "Laptops", quantity: 25, serialNumbers: "LAP123-LAP147", vendor: "Dell", assignedTo: "Employees", warrantyExpiry: "2026-01-15" },
+                { item: "Monitors", quantity: 30, serialNumbers: "MON1001-MON1030", vendor: "HP", assignedTo: "Office Use", warrantyExpiry: "2025-12-31" },
+                { item: "Keyboards", quantity: 25, serialNumbers: "KB1001-KB1025", vendor: "Logitech", assignedTo: "Office Use", warrantyExpiry: "2026-01-01" },
+                { item: "Routers", quantity: 3, serialNumbers: "R1001-R1003", vendor: "Cisco", assignedTo: "IT Department", warrantyExpiry: "2027-01-01" },
+                { item: "External Drives", quantity: 10, serialNumbers: "ED001-ED010", vendor: "Seagate", assignedTo: "IT Department", warrantyExpiry: "2025-06-30" }
+            ],
+            "Software Licenses": [
+                { software: "Microsoft 365", noOfLicenses: 25, vendor: "Microsoft", expiryDate: "2025-12-31", costPerLicense: 120, assignedTo: "Employees" },
+                { software: "Zoom", noOfLicenses: 5, vendor: "Zoom", expiryDate: "2025-07-01", costPerLicense: 150, assignedTo: "Team Leads" },
+                { software: "QuickBooks", noOfLicenses: 1, vendor: "Intuit", expiryDate: "2025-04-01", costPerLicense: 400, assignedTo: "Finance" },
+                { software: "Antivirus", noOfLicenses: 25, vendor: "Norton", expiryDate: "2025-11-15", costPerLicense: 50, assignedTo: "IT" }
+            ],
+            "Furniture": [
+                { item: "Office Desks", quantity: 25, costPerUnit: 150, vendor: "Ikea", purchaseDate: "2024-06-15", location: "Workstations" },
+                { item: "Office Chairs", quantity: 25, costPerUnit: 100, vendor: "Staples", purchaseDate: "2024-06-15", location: "Workstations" },
+                { item: "Filing Cabinets", quantity: 10, costPerUnit: 75, vendor: "Amazon", purchaseDate: "2024-05-10", location: "Storage Room" },
+                { item: "Break Room Table", quantity: 2, costPerUnit: 200, vendor: "Walmart", purchaseDate: "2024-07-01", location: "Break Room" },
+                { item: "Conference Table", quantity: 1, costPerUnit: 500, vendor: "Office Depot", purchaseDate: "2024-05-15", location: "Conference Room" }
+            ],
+            "Networking & Communication": [
+                { item: "VoIP Phones", quantity: 10, model: "Cisco 8841", vendor: "Cisco", assignedTo: "Employees", lastMaintained: "2024-12-01" },
+                { item: "Headsets", quantity: 25, model: "Jabra Evolve 40", vendor: "Jabra", assignedTo: "Employees", lastMaintained: "2024-11-15" },
+                { item: "Routers", quantity: 3, model: "Linksys MX5300", vendor: "Amazon", assignedTo: "IT", lastMaintained: "2024-12-20" }
+            ],
+            "Office Electronics": [
+                { item: "Printers", quantity: 2, model: "HP LaserJet Pro", vendor: "HP", cost: 300, warrantyExpiry: "2026-01-01" },
+                { item: "Scanners", quantity: 1, model: "Epson DS-530", vendor: "Epson", cost: 250, warrantyExpiry: "2025-12-15" },
+                { item: "Projectors", quantity: 1, model: "BenQ MW612", vendor: "BenQ", cost: 500, warrantyExpiry: "2026-01-01" }
+            ],
+            "Consumables": [
+                { item: "Printer Ink Cartridges", quantity: 20, unitCost: 30, vendor: "HP", lastRestocked: "2024-12-20", minQuantity: 5 },
+                { item: "Coffee Beans", quantity: 10, unitCost: 15, vendor: "Starbucks", lastRestocked: "2025-01-10", minQuantity: 3 },
+                { item: "Cleaning Wipes", quantity: 50, unitCost: 5, vendor: "Walmart", lastRestocked: "2024-12-15", minQuantity: 10 }
+            ],
+            "Security": [
+                { item: "CCTV Cameras", quantity: 5, costPerUnit: 200, vendor: "Amazon", maintenanceDate: "2024-11-01" },
+                { item: "Fire Extinguishers", quantity: 3, costPerUnit: 75, vendor: "Home Depot", maintenanceDate: "2024-10-01" },
+                { item: "Access Cards", quantity: 30, costPerUnit: 10, vendor: "Local Vendor", maintenanceDate: "2024-12-01" }
+            ],
+            "Miscellaneous": [
+                { item: "Plants", quantity: 10, description: "Decorative Plants", costPerUnit: 20, vendor: "Ikea" },
+                { item: "Toolkits", quantity: 3, description: "Basic Toolkit", costPerUnit: 50, vendor: "Amazon" },
+                { item: "Event Banners", quantity: 2, description: "Logo Branding", costPerUnit: 100, vendor: "Local Printer" }
+            ]
+        };
+
+        // Function to handle login
+        function allowSignIn() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            if (username === "admin" && password === "password123") {
+                document.getElementById("login").style.display = "none";
+                document.getElementById("dashboard").style.display = "block";
+            } else {
+                document.getElementById("error-message").textContent = "Please enter both username and password.";
+            }
+        }
+
+        // Function to view inventory
+        function viewInventory() {
+            const dashboard = document.getElementById("dashboard");
+            const inventorySection = document.getElementById("inventory-section");
+            const inventoryContainer = document.getElementById("inventory-container");
+            
+            // Clear the container before adding new data
+            inventoryContainer.innerHTML = "";
+
+            // Loop through inventory categories and display in table format
+            for (const category in inventoryData) {
+                const table = document.createElement("table");
+                const headerRow = document.createElement("tr");
+
+                const headers = Object.keys(inventoryData[category][0]);
+                headers.forEach(header => {
+                    const th = document.createElement("th");
+                    th.textContent = header;
+                    headerRow.appendChild(th);
+                });
+                table.appendChild(headerRow);
+
+                inventoryData[category].forEach(item => {
+                    const row = document.createElement("tr");
+                    headers.forEach(header => {
+                        const td = document.createElement("td");
+                        td.textContent = item[header];
+                        row.appendChild(td);
+                    });
+                    table.appendChild(row);
+                });
+
+                // Category Title
+                const categoryTitle = document.createElement("h2");
+                categoryTitle.textContent = category;
+                inventoryContainer.appendChild(categoryTitle);
+
+                // Append the table to the inventory container
+                inventoryContainer.appendChild(table);
+            }
+
+            // Hide the dashboard and show the inventory section
+            dashboard.style.display = "none";
+            inventorySection.style.display = "block";
+        }
+
+        // Function to add a new item (template for adding new items will be here)
+        function addItem() {
+            const dashboard = document.getElementById("dashboard");
+            const addItemSection = document.getElementById("add-new-item-section");
+
+            dashboard.style.display = "none";
+            addItemSection.style.display = "block";
+        }
+
+        // Function to view restocking needs
+        function viewRestocking() {
+            const dashboard = document.getElementById("dashboard");
+            const restockingSection = document.getElementById("restocking-section");
+
+            dashboard.style.display = "none";
+            restockingSection.style.display = "block";
+        }
+
+        // Function to go back to the dashboard
+        function backToDashboard() {
+            document.getElementById("inventory-section").style.display = "none";
+            document.getElementById("add-new-item-section").style.display = "none";
+            document.getElementById("restocking-section").style.display = "none";
+            document.getElementById("dashboard").style.display = "block";
+        }
+    </script>
+</body>
+
+</html>
